@@ -1,5 +1,10 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 
+#[get("/version")]
+async fn ver() -> impl Responder {
+    HttpResponse::Ok().body("0.2.0")
+}
+
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
