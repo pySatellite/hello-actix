@@ -21,7 +21,7 @@ async fn manual_hello() -> impl Responder {
 
 #[get("/healthcheck")]
 async fn healthcheck() -> impl Responder {
-    HttpResponse::Ok().body("Health Check Completed!")
+    HttpResponse::Ok().body("I am doing well and you?")
 }
 
 #[actix_web::main]
