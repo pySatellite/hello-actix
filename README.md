@@ -55,5 +55,20 @@ Rust Actix-web server started at 127.0.0.1:8080
 Rust Actix-web server started at 127.0.0.1:8080
 ```
 
+### Docker Build & Tag & Push
+```bash
+$ docker build -t pysatellite/hello-actix:0.2.1 .
+
+$ docker tag pysatellite/hello-actix:0.2.1 pysatellite/hello-actix
+
+$ docker push pysatellite/hello-actix
+
+```
+
+### Docker Run
+```bash
+$ docker run -dit --rm --name hello-actix -p 8021:8080 pysatellite/hello-actix:0.2.1
+```
+
 ### ref
 - [How can a Rust program access metadata from its Cargo package?](https://stackoverflow.com/questions/27840394/how-can-a-rust-program-access-metadata-from-its-cargo-package)
