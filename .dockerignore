@@ -1,0 +1,6 @@
+fly.toml
+docker_build_push.sh
+docker_build_run.sh
+.github/
+.git/
+Dockerfile
