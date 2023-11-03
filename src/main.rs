@@ -1,4 +1,5 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use std::time::Instant;
 
 #[get("/")]
 async fn hello() -> impl Responder {
@@ -25,13 +26,19 @@ async fn version() -> impl Responder {
     HttpResponse::Ok().body(VERSION)
 }
 
-#[get("/iambest")]
-async fn iambest() -> impl Responder {
+#[get("/iambest/{limit}")]
+async fn iambest(req: HttpRequest) -> HttpResponse {
+    let start = Instant::now();
     let mut sum: u64 = 0;
-    for i in 1..1_000_000_001 {
+    let limit: u64 = req.match_info().get("limit").unwrap().parse().unwrap();
+    for i in 0..limit {
         sum += i;
     }
-    HttpResponse::Ok().body(sum.to_string())
+    let duration = start.elapsed();
+    HttpResponse::Ok().body(format!(
+        "duration: {:?}, limit: {}, sum: {}",
+        duration, limit, sum
+    ))
 }
 
 #[actix_web::main]
