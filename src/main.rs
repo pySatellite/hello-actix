@@ -25,6 +25,15 @@ async fn version() -> impl Responder {
     HttpResponse::Ok().body(VERSION)
 }
 
+#[get("/iambest")]
+async fn iambest() -> impl Responder {
+    let mut sum: u64 = 0;
+    for i in 1..1_000_000_001 {
+        sum += i;
+    }
+    HttpResponse::Ok().body(sum.to_string())
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     println!("Rust Actix-web server started at 127.0.0.1:8080");
@@ -35,6 +44,7 @@ async fn main() -> std::io::Result<()> {
             .service(echo)
             .service(healthcheck)
             .service(version)
+            .service(iambest)
             .route("/hey", web::get().to(manual_hello))
     })
     .bind(("0.0.0.0", 8080))?
