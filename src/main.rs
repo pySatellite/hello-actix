@@ -42,10 +42,12 @@ async fn iambest(req: HttpRequest) -> HttpResponse {
     let sum = calculate_sum(limit);
 
     let duration = start.elapsed();
-    HttpResponse::Ok().body(format!(
-        "duration: {:?}, limit: {}, sum: {}",
-        duration, limit, sum
-    ))
+    let response = serde_json::json!({
+        "duration": duration,
+        "limit": limit,
+        "sum": sum
+    });
+    HttpResponse::Ok().json(response)
 }
 
 #[get("/iambest/{limit}/{times}")]
@@ -61,10 +63,13 @@ async fn iambest_times(req: HttpRequest) -> HttpResponse {
     }
 
     let duration = start.elapsed();
-    HttpResponse::Ok().body(format!(
-        "duration: {:?}, limit: {}, sum: {}",
-        duration, limit, sum
-    ))
+
+    let response = serde_json::json!({
+        "duration": duration,
+        "limit": limit,
+        "sum": sum
+    });
+    HttpResponse::Ok().json(response)
 }
 
 #[actix_web::main]
