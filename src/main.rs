@@ -26,14 +26,40 @@ async fn version() -> impl Responder {
     HttpResponse::Ok().body(VERSION)
 }
 
-#[get("/iambest/{limit}")]
-async fn iambest(req: HttpRequest) -> HttpResponse {
-    let start = Instant::now();
+fn calculate_sum(limit: u64) -> u64 {
     let mut sum: u64 = 0;
-    let limit: u64 = req.match_info().get("limit").unwrap().parse().unwrap();
     for i in 0..limit {
         sum += i;
     }
+    sum
+}
+
+#[get("/iambest/{limit}")]
+async fn iambest(req: HttpRequest) -> HttpResponse {
+    let start = Instant::now();
+
+    let limit: u64 = req.match_info().get("limit").unwrap().parse().unwrap();
+    let sum = calculate_sum(limit);
+
+    let duration = start.elapsed();
+    HttpResponse::Ok().body(format!(
+        "duration: {:?}, limit: {}, sum: {}",
+        duration, limit, sum
+    ))
+}
+
+#[get("/iambest/{limit}/{times}")]
+async fn iambest_times(req: HttpRequest) -> HttpResponse {
+    let start = Instant::now();
+
+    let limit: u64 = req.match_info().get("limit").unwrap().parse().unwrap();
+    let times: u64 = req.match_info().get("times").unwrap().parse().unwrap();
+
+    let mut sum: u64 = 0;
+    for _ in 0..times {
+        sum = calculate_sum(limit);
+    }
+
     let duration = start.elapsed();
     HttpResponse::Ok().body(format!(
         "duration: {:?}, limit: {}, sum: {}",
@@ -52,6 +78,7 @@ async fn main() -> std::io::Result<()> {
             .service(healthcheck)
             .service(version)
             .service(iambest)
+            .service(iambest_times)
             .route("/hey", web::get().to(manual_hello))
     })
     .bind(("0.0.0.0", 8080))?
