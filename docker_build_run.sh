@@ -5,6 +5,7 @@ ver_num=$(echo $ver | sed 's/\.//g')
 
 docker build -t pysatellite/hello-actix:$ver .
 
-docker run -dit --rm --name hello-actix -p 8${ver_num}:8080 pysatellite/hello-actix:$ver
+docker stop hello-actix
+docker run -dit --rm --name hello-actix -p 8${ver_num}:8080 --cpus=".01" --memory 6m pysatellite/hello-actix:$ver
 
-docker ps
+docker stats
