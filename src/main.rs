@@ -1,4 +1,6 @@
 use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use serde_json::json;
+use std::thread;
 use std::time::Instant;
 
 #[get("/")]
@@ -36,39 +38,59 @@ fn calculate_sum(limit: u64) -> u64 {
 
 #[get("/iambest/{limit}")]
 async fn iambest(req: HttpRequest) -> HttpResponse {
-    let start = Instant::now();
-
-    let limit: u64 = req.match_info().get("limit").unwrap().parse().unwrap();
-    let sum = calculate_sum(limit);
-
-    let duration = start.elapsed();
-    let response = serde_json::json!({
-        "duration": duration,
-        "limit": limit,
-        "sum": sum
-    });
-    HttpResponse::Ok().json(response)
+    calculate_and_respond(req, 1).await
 }
 
 #[get("/iambest/{limit}/{times}")]
 async fn iambest_times(req: HttpRequest) -> HttpResponse {
-    let start = Instant::now();
-
-    let limit: u64 = req.match_info().get("limit").unwrap().parse().unwrap();
     let times: u64 = req.match_info().get("times").unwrap().parse().unwrap();
+    calculate_and_respond(req, times).await
+}
 
+async fn calculate_and_respond(req: HttpRequest, times: u64) -> HttpResponse {
+    let start = Instant::now();
+    let limit: u64 = req.match_info().get("limit").unwrap().parse().unwrap();
     let mut sum: u64 = 0;
+
     for _ in 0..times {
-        sum = calculate_sum(limit);
+        sum += calculate_sum(limit);
     }
 
     let duration = start.elapsed();
-
-    let response = serde_json::json!({
+    let response = json!({
         "duration": duration,
         "limit": limit,
         "sum": sum
     });
+
+    HttpResponse::Ok().json(response)
+}
+
+fn worker() {
+    let mut _x = 0;
+    loop {
+        _x += 1;
+        _x -= 1;
+    }
+}
+
+#[get("/hicpu")]
+async fn hicpu() -> HttpResponse {
+    let num_threads = num_cpus::get();
+    println!("Threads in this system: {}", num_threads + 1);
+    println!("Using {} threads for stress test", num_threads + 1);
+    for i in 1..num_threads {
+        println!("Spawning thread number {}", i);
+        thread::spawn(|| {
+            worker();
+        });
+    }
+    println!("Using main as last thread");
+    worker();
+    let response = json!({
+        "duration": "lllllllllllllllllong",
+    });
+
     HttpResponse::Ok().json(response)
 }
 
@@ -84,6 +106,7 @@ async fn main() -> std::io::Result<()> {
             .service(version)
             .service(iambest)
             .service(iambest_times)
+            .service(hicpu)
             .route("/hey", web::get().to(manual_hello))
     })
     .bind(("0.0.0.0", 8080))?
